@@ -10,10 +10,11 @@ The output stats are also in CSV format, you can use your favourite tool to proc
 
 
 ```
-$ ruby 3commas_csv_analyszer.rb
-File not found export.csv
+$ ruby 3commas_csv_analyzer.rb
+File not found
 
     usage:
-        ruby 3commas_csv_analyszer.rb <path to export csv>
-            default export file name is export.csv in the same directory 3commas_csv_analyszer.rb
+        ruby 3commas_csv_analyzer.rb <path to export csv>
+            default export file name is the latest csv file starts with 'export' in file name in directory: C:/Users/ericl/Documents/code/3commas_csv_analyzer
+
 ```

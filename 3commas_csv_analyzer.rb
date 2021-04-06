@@ -10,11 +10,17 @@ def usage
     """
     usage: 
         ruby #{__FILE__} <path to export csv>
-            default export file name is export.csv in the same directory #{File.basename(__FILE__)} 
+            default export file name is the latest csv file starts with 'export' in file name in directory: #{File.expand_path(File.dirname(__FILE__))} 
     """
 end
-file = 'export.csv'
-file = ARGV.first unless ARGV.empty? 
+file = ''
+if ARGV.empty?
+    csv = Dir.glob("export*csv").max_by {|f| File.mtime(f)}
+    file = csv if csv
+else
+    file = ARGV.first unless ARGV.empty? 
+end
+
 unless File.exist?(file)
     puts "File not found #{file}"
     puts usage
@@ -59,3 +65,4 @@ print_stat(data,now,24 * 7, "last 7 days")
 print_stat(data,now,24, "last 24 hours")
 print_stat(data,now,12, "last 12 hours")
 print_stat(data,now,6, "last 6 hours")
+puts "file processed: #{file}"
