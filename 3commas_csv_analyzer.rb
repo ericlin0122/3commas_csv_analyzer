@@ -38,11 +38,12 @@ File.readlines(file).each do |line|
     profit_percentage_from_total_volume = items[indexes["profit_percentage_from_total_volume"]]
     final_profit = items[indexes["final_profit"]]
     closed_at = items[indexes["closed_at"]]
+    used_safety_orders = items[indexes["used_safety_orders"]].to_i
     name = "#{bot} - #{pair}"
     if data[name]
-        data[name] << {pair: pair, profit_percentage_from_total_volume: profit_percentage_from_total_volume.to_f, final_profit: final_profit.to_f, closed_at: Time.parse(closed_at)}
+        data[name] << {pair: pair, profit_percentage_from_total_volume: profit_percentage_from_total_volume.to_f, final_profit: final_profit.to_f, closed_at: Time.parse(closed_at), used_safety_orders: used_safety_orders}
     else
-        data[name] = [{pair: pair, profit_percentage_from_total_volume: profit_percentage_from_total_volume.to_f, final_profit: final_profit.to_f, closed_at: Time.parse(closed_at)}]
+        data[name] = [{pair: pair, profit_percentage_from_total_volume: profit_percentage_from_total_volume.to_f, final_profit: final_profit.to_f, closed_at: Time.parse(closed_at), used_safety_orders: used_safety_orders}]
     end
 end
 now = Time.now
@@ -50,12 +51,15 @@ header = "name, deal_count, total_profit_percentage_from_total_volume, total_fin
 
 def print_stat(data, now, hours, comment)
     puts "#{'='*12} #{comment} #{'='*12} "
-    puts "name, deal_count, total_profit_percentage_from_total_volume, total_final_profit"
-    data.inject({}) { |h, (k, v)| h[k] = v.reject{|hash| now - hours*HOUR >= hash[:closed_at] }; h }.sort_by{|k, v| v.size}.each do |name, d| 
+    puts "name, deal_count, total_profit_percentage_from_total_volume, total_final_profit, total_used_safety_orders(average per trade)"
+    i = 1
+    data.inject({}) { |h, (k, v)| h[k] = v.reject{|hash| now - hours*HOUR >= hash[:closed_at] }; h }.sort_by{|k, v| v.size}.reverse.each do |name, d| 
         next if d.size <= MIN_DEAL_COUNT
         total_profit_percentage_from_total_volume = d.inject(0.0) {|sum, hash| sum + hash[:profit_percentage_from_total_volume]}
+        total_used_safety_orders = d.inject(0) {|sum, hash| sum + hash[:used_safety_orders]}
         total_final_profit = d.inject(0) {|sum, hash| sum + hash[:final_profit]}
-        puts "#{name}, #{d.size}, #{total_profit_percentage_from_total_volume.round(3)}, #{total_final_profit.round(3)}" 
+        puts "#{i} #{name}, #{d.size}, #{total_profit_percentage_from_total_volume.round(3)}, #{total_final_profit.round(3)}, #{total_used_safety_orders}(#{(total_final_profit/d.size*1.0).round(1)})" 
+        i += 1
     end
 end
 
