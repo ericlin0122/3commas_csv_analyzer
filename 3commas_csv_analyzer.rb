@@ -86,6 +86,7 @@ def print_stat(data, now, hours, comment)
     puts '-' * 40
     puts "simple pair stats: #{simple.inspect}"
     puts "complex pair stats: #{complex.inspect}"
+    puts "combined stats: #{simple.merge(complex) { |k, o, n| o + n }}"
 end
 
 print_stat(data,now,99999, "all time")
