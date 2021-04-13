@@ -50,7 +50,7 @@ File.readlines(file).each do |line|
         data[name] = [{pair: pair, profit_percentage_from_total_volume: profit_percentage_from_total_volume.to_f, final_profit: final_profit.to_f, closed_at: Time.parse(closed_at + "UTC"), used_safety_orders: used_safety_orders, bot_type: bot_type}]
     end
 end
-now = Time.now.utc.to_i
+now = Time.now.utc
 header = "name, deal_count, total_profit_percentage_from_total_volume, total_final_profit"
 
 def print_stat(data, now, hours, comment)
@@ -60,8 +60,8 @@ def print_stat(data, now, hours, comment)
     composite = {pairs: 0, deal_count: 0, profit_in_dollar: 0.0, profit_in_percent: 0.0, safety_orders: 0}
     simple = {pairs: 0, deal_count: 0, profit_in_dollar: 0.0, profit_in_percent: 0.0, safety_orders: 0}
     closed_safety_order_stats = {}
-    data.inject({}) { |h, (k, v)| h[k] = v.select{|hash| now - hours*HOUR < hash[:closed_at].to_i }; h }.sort_by{|k, v| v.size}.reverse.each do |name, d| 
-        next if d.size <= MIN_DEAL_COUNT
+    data.inject({}) { |h, (k, v)| h[k] = v.select{|hash| now - hours*HOUR < hash[:closed_at] }; h }.sort_by{|k, v| v.size}.reverse.each do |name, d| 
+        next if d.size == 0 
         total_profit_percentage_from_total_volume = d.inject(0.0) {|sum, hash| sum + hash[:profit_percentage_from_total_volume]}
         total_used_safety_orders = d.inject(0) {|sum, hash| sum + hash[:used_safety_orders]}
         total_final_profit = d.inject(0) {|sum, hash| sum + hash[:final_profit]}
@@ -99,7 +99,7 @@ def print_stat(data, now, hours, comment)
     closed_safety_order_stats.each.sort.each {|key,value| puts "#{key}: #{value} (#{(value / total_safety * 100).round(2)}%)"}
 end
 
-print_stat(data,now,99999, "all time")
+print_stat(data,now,24 * 7 * 30 * 365 * 10, "all time")
 print_stat(data,now,24 * 7 * 30, "last 30 days")
 print_stat(data,now,24 * 7, "last 7 days")
 print_stat(data,now,24, "last 24 hours")
